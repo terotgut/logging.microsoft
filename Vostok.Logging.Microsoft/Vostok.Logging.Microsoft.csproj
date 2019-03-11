@@ -23,6 +23,7 @@
     <PackageProjectUrl>https://github.com/vostok/logging.microsoft</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/vostok/logging.microsoft/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>vostok vostok.logging</PackageTags>
+    <PackageReleaseNotes>https://github.com/vostok/logging.microsoft/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/vostok/logging.microsoft</RepositoryUrl>
   </PropertyGroup>
 

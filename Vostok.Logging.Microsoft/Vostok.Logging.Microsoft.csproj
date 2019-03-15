@@ -1,24 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <Import Project="..\..\vostok.devtools\library-common-props\Main-Project.props" />
   <Import Project="..\..\vostok.devtools\git-commit-to-assembly-title\Vostok.Tools.GitCommit2AssemblyTitle.props" />
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
-
   <PropertyGroup>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>1.0.1</VersionPrefix>
   </PropertyGroup>
-
   <PropertyGroup>
     <Title>Vostok.Logging.Microsoft</Title>
     <Description>An implementation of Microsoft.Extensions.Logging.Abstractions.ILogger that writes log events to Vostok ILog.</Description>
   </PropertyGroup>
-
   <PropertyGroup>
     <PackageProjectUrl>https://github.com/vostok/logging.microsoft</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/vostok/logging.microsoft/blob/master/LICENSE</PackageLicenseUrl>
@@ -26,18 +21,15 @@
     <PackageReleaseNotes>https://github.com/vostok/logging.microsoft/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/vostok/logging.microsoft</RepositoryUrl>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="Vostok.Logging.Abstractions">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\vostok.logging.abstractions\Vostok.Logging.Abstractions\bin\Release\netstandard2.0\Vostok.Logging.Abstractions.dll</HintPath>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <None Include="..\module.yaml">
       <Link>module.yaml</Link>
@@ -49,5 +41,4 @@
       <Link>README.md</Link>
     </None>
   </ItemGroup>
-
 </Project>

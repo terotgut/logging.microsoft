@@ -49,7 +49,6 @@ namespace Vostok.Logging.Microsoft
         private class Logger : ILogger
         {
             private const string OriginalFormatKey = "{OriginalFormat}";
-            private const string ScopeProperty = "Scope";
 
             private readonly ILog log;
             private readonly AsyncLocal<Scope> currentScope = new AsyncLocal<Scope>();
@@ -80,16 +79,6 @@ namespace Vostok.Logging.Microsoft
                 var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);
 
                 var properties = new Dictionary<string, object>();
-                if (currentScope.Value == null)
-                    properties.Add(ScopeProperty, scopeValue);
-                else
-                {
-                    var scopePropertyValue = new List<string>{ scopeValue };
-                    for (var s = currentScope.Value; s != null; s = s.Parent)
-                        scopePropertyValue.Add(s.ScopeValue);
-                    scopePropertyValue.Reverse();
-                    properties.Add(ScopeProperty, scopePropertyValue);
-                }
                 if (state is IEnumerable<KeyValuePair<string, object>> props)
                 {
                     foreach (var kvp in props)
@@ -101,7 +90,7 @@ namespace Vostok.Logging.Microsoft
                 
                 var scopeLog = log.WithProperties(properties).WithOperationContext();
                 
-                var scope = new Scope(this, scopeLog, currentScope.Value, scopeValue);
+                var scope = new Scope(scopeLog, scopeValue);
                 currentScope.Value = scope;
                 return scope;
             }
@@ -165,26 +154,19 @@ namespace Vostok.Logging.Microsoft
 
             private class Scope : IDisposable
             {
-                private readonly Logger owner;
                 private readonly OperationContextToken operationContextToken;
 
-                public readonly Scope Parent;
-                public readonly string ScopeValue;
                 public readonly ILog Log;
 
-                public Scope(Logger owner, ILog log, Scope parent, string scopeValue)
+                public Scope(ILog log, string scopeValue)
                 {
-                    this.owner = owner;
                     Log = log;
-                    Parent = parent;
-                    ScopeValue = scopeValue;
                     operationContextToken = new OperationContextToken(scopeValue);
                 }
 
                 public void Dispose()
                 {
                     operationContextToken.Dispose();
-                    owner.currentScope.Value = Parent;
                 }
             }
         }

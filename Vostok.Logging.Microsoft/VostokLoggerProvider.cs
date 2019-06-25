@@ -4,6 +4,7 @@ using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Vostok.Logging.Abstractions;
+using Vostok.Logging.Context;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Vostok.Logging.Microsoft
@@ -77,7 +78,8 @@ namespace Vostok.Logging.Microsoft
             public IDisposable BeginScope<TState>(TState state)
             {
                 var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);
-                
+                var operationContextToken = new OperationContextToken(scopeValue);
+
                 var properties = new Dictionary<string, object>();
                 if (currentScope.Value == null)
                     properties.Add(ScopeProperty, scopeValue);
@@ -100,7 +102,7 @@ namespace Vostok.Logging.Microsoft
                 
                 var scopeLog = log.WithProperties(properties);
                 
-                var scope = new Scope(this, scopeLog, currentScope.Value, scopeValue);
+                var scope = new Scope(this, scopeLog, currentScope.Value, scopeValue, operationContextToken);
                 currentScope.Value = scope;
                 return scope;
             }
@@ -165,22 +167,25 @@ namespace Vostok.Logging.Microsoft
             private class Scope : IDisposable
             {
                 private readonly Logger owner;
-                
+                private readonly OperationContextToken operationContextToken;
+
                 public readonly Scope Parent;
                 public readonly string ScopeValue;
                 public readonly ILog Log;
 
-                public Scope(Logger owner, ILog log, Scope parent, string scopeValue)
+                public Scope(Logger owner, ILog log, Scope parent, string scopeValue, OperationContextToken operationContextToken)
                 {
                     this.owner = owner;
                     Log = log;
                     Parent = parent;
                     ScopeValue = scopeValue;
+                    this.operationContextToken = operationContextToken;
                 }
 
                 public void Dispose()
                 {
                     owner.currentScope.Value = Parent;
+                    operationContextToken.Dispose();
                 }
             }
         }

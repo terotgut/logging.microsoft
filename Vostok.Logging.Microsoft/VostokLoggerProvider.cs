@@ -78,7 +78,6 @@ namespace Vostok.Logging.Microsoft
             public IDisposable BeginScope<TState>(TState state)
             {
                 var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);
-                var operationContextToken = new OperationContextToken(scopeValue);
 
                 var properties = new Dictionary<string, object>();
                 if (currentScope.Value == null)
@@ -100,9 +99,9 @@ namespace Vostok.Logging.Microsoft
                     }
                 }
                 
-                var scopeLog = log.WithProperties(properties);
+                var scopeLog = log.WithProperties(properties).WithOperationContext();
                 
-                var scope = new Scope(this, scopeLog, currentScope.Value, scopeValue, operationContextToken);
+                var scope = new Scope(this, scopeLog, currentScope.Value, scopeValue);
                 currentScope.Value = scope;
                 return scope;
             }
@@ -173,19 +172,19 @@ namespace Vostok.Logging.Microsoft
                 public readonly string ScopeValue;
                 public readonly ILog Log;
 
-                public Scope(Logger owner, ILog log, Scope parent, string scopeValue, OperationContextToken operationContextToken)
+                public Scope(Logger owner, ILog log, Scope parent, string scopeValue)
                 {
                     this.owner = owner;
                     Log = log;
                     Parent = parent;
                     ScopeValue = scopeValue;
-                    this.operationContextToken = operationContextToken;
+                    operationContextToken = new OperationContextToken(scopeValue);
                 }
 
                 public void Dispose()
                 {
-                    owner.currentScope.Value = Parent;
                     operationContextToken.Dispose();
+                    owner.currentScope.Value = Parent;
                 }
             }
         }

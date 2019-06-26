@@ -4,6 +4,7 @@ using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Vostok.Logging.Abstractions;
+using Vostok.Logging.Context;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Vostok.Logging.Microsoft
@@ -48,7 +49,6 @@ namespace Vostok.Logging.Microsoft
         private class Logger : ILogger
         {
             private const string OriginalFormatKey = "{OriginalFormat}";
-            private const string ScopeProperty = "Scope";
 
             private readonly ILog log;
             private readonly AsyncLocal<Scope> currentScope = new AsyncLocal<Scope>();
@@ -77,30 +77,20 @@ namespace Vostok.Logging.Microsoft
             public IDisposable BeginScope<TState>(TState state)
             {
                 var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);
-                
-                var properties = new Dictionary<string, object>();
-                if (currentScope.Value == null)
-                    properties.Add(ScopeProperty, scopeValue);
-                else
-                {
-                    var scopePropertyValue = new List<string>{ scopeValue };
-                    for (var s = currentScope.Value; s != null; s = s.Parent)
-                        scopePropertyValue.Add(s.ScopeValue);
-                    scopePropertyValue.Reverse();
-                    properties.Add(ScopeProperty, scopePropertyValue);
-                }
+                var scopeLog = log.WithOperationContext();
+
                 if (state is IEnumerable<KeyValuePair<string, object>> props)
                 {
                     foreach (var kvp in props)
                     {
                         if (kvp.Key != OriginalFormatKey)
-                            properties[kvp.Key] = kvp.Value;
+                        {
+                            scopeLog = scopeLog.WithProperty(kvp.Key, kvp.Value);
+                        }
                     }
                 }
                 
-                var scopeLog = log.WithProperties(properties);
-                
-                var scope = new Scope(this, scopeLog, currentScope.Value, scopeValue);
+                var scope = new Scope(scopeLog, scopeValue);
                 currentScope.Value = scope;
                 return scope;
             }
@@ -164,23 +154,19 @@ namespace Vostok.Logging.Microsoft
 
             private class Scope : IDisposable
             {
-                private readonly Logger owner;
-                
-                public readonly Scope Parent;
-                public readonly string ScopeValue;
+                private readonly OperationContextToken operationContextToken;
+
                 public readonly ILog Log;
 
-                public Scope(Logger owner, ILog log, Scope parent, string scopeValue)
+                public Scope(ILog log, string scopeValue)
                 {
-                    this.owner = owner;
                     Log = log;
-                    Parent = parent;
-                    ScopeValue = scopeValue;
+                    operationContextToken = new OperationContextToken(scopeValue);
                 }
 
                 public void Dispose()
                 {
-                    owner.currentScope.Value = Parent;
+                    operationContextToken.Dispose();
                 }
             }
         }

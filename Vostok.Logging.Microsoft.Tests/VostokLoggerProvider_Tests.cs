@@ -129,7 +129,7 @@ namespace Vostok.Logging.Microsoft.Tests
             }
 
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message {p1} {p2}")
-                .WithProperty("Scope", "scope sv1 sv2")
+                .WithProperty("OperationContext", new OperationContextValue("scope sv1 sv2"))
                 .WithProperty("sp1", "sv1")
                 .WithProperty("sp2", "sv2")
                 .WithProperty("p1", "v1")
@@ -153,7 +153,7 @@ namespace Vostok.Logging.Microsoft.Tests
             }
 
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message {p1} {p2}")
-                .WithProperty("Scope", new[] {"s1", "s2"})
+                .WithProperty("OperationContext", new OperationContextValue(new[]{"s1", "s2"}))
                 .WithProperty("p1", "v1")
                 .WithProperty("p2", "v2");
 
@@ -243,7 +243,7 @@ namespace Vostok.Logging.Microsoft.Tests
             task.Wait();
 
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message")
-                .WithProperty("Scope", "outer-scope");
+                .WithProperty("OperationContext", new OperationContextValue("outer-scope"));
 
             log.Events.Single()
                 .Should()

@@ -1,3 +1,7 @@
+## 2.0.0 (26.06.2019):
+
+* Breaking change: BeginScope() method no longer adds a `Scope` property to log events. Instead, it utilizes well-known operation context property.
+
 ## 1.0.0 (11.03.2019):
 
 * Adapted to ForContext() in changes in abstractions module.

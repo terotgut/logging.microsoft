@@ -183,7 +183,7 @@ namespace Vostok.Logging.Microsoft.Tests
             }
             
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message")
-                .WithProperty("operationContext", new OperationContextValue(new[] { "System.Collections.Generic.HashSet`1[System.Int32]" }));
+                .WithProperty("operationContext", new OperationContextValue(new[] { "System.Collections.Generic.HashSet`1[System.String]" }));
 
             log.Events.Single()
                 .Should()

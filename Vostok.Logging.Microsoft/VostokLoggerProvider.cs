@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -53,10 +54,10 @@ namespace Vostok.Logging.Microsoft
             private const string OriginalFormatKey = "{OriginalFormat}";
 
             private readonly ILog log;
-            private readonly HashSet<Type> disabledScopes;
+            private readonly IReadOnlyCollection<Type> disabledScopes;
             private readonly AsyncLocal<Scope> currentScope = new AsyncLocal<Scope>();
 
-            public Logger(ILog log, HashSet<Type> disabledScopes)
+            public Logger(ILog log, IReadOnlyCollection<Type> disabledScopes)
             {
                 this.log = log;
                 this.disabledScopes = disabledScopes;
@@ -80,7 +81,7 @@ namespace Vostok.Logging.Microsoft
 
             public IDisposable BeginScope<TState>(TState state)
             {
-                if (disabledScopes?.Contains(typeof(TState)) == false)
+                if (disabledScopes?.Contains(typeof(TState)) == true)
                     return new EmptyDisposable();
 
                 var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);

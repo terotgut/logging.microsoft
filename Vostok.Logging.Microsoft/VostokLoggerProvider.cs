@@ -55,7 +55,7 @@ namespace Vostok.Logging.Microsoft
 
             private readonly ILog log;
             private readonly IReadOnlyCollection<Type> disabledScopes;
-            private readonly AsyncLocal<Scope> currentScope = new AsyncLocal<Scope>();
+            private readonly AsyncLocal<UseScope> scope = new AsyncLocal<UseScope>();
 
             public Logger(ILog log, IReadOnlyCollection<Type> disabledScopes)
             {
@@ -74,7 +74,7 @@ namespace Vostok.Logging.Microsoft
 
                 var messageTemplate = ExtractMessageTemplate(state, exception, formatter);
                 var logEvent = EnrichWithProperties(new LogEvent(translatedLevel, DateTimeOffset.Now, messageTemplate, exception), eventId, state);
-                (currentScope.Value?.Log ?? log).Log(logEvent);
+                (scope.Value?.Log ?? log).Log(logEvent);
             }
 
             public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None && log.IsEnabledFor(TranslateLogLevel(logLevel));
@@ -98,9 +98,7 @@ namespace Vostok.Logging.Microsoft
                     }
                 }
                 
-                var scope = new Scope(scopeLog, scopeValue, currentScope);
-                currentScope.Value = scope;
-                return scope;
+                return new UseScope(scopeLog, scopeValue, scope);
             }
 
             private static LogEvent EnrichWithProperties<TState>(LogEvent logEvent, EventId eventId, TState state)
@@ -160,15 +158,15 @@ namespace Vostok.Logging.Microsoft
                 }
             }
 
-            private class Scope : IDisposable
+            private class UseScope : IDisposable
             {
                 public readonly ILog Log;
                 
                 private readonly OperationContextToken operationContextToken;
-                private readonly AsyncLocal<Scope> scope;
-                private readonly Scope previousScopeValue;
+                private readonly AsyncLocal<UseScope> scope;
+                private readonly UseScope previousScopeValue;
 
-                public Scope(ILog log, string scopeValue, AsyncLocal<Scope> scope)
+                public UseScope(ILog log, string scopeValue, AsyncLocal<UseScope> scope)
                 {
                     Log = log;
                     this.scope = scope;

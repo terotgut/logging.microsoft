@@ -17,14 +17,16 @@ namespace Vostok.Logging.Microsoft
     public class VostokLoggerProvider : ILoggerProvider
     {
         private readonly ILog log;
+        private readonly VostokLoggerProviderSettings settings;
 
         /// <summary>
-        /// <para>Create a new <see cref="VostokLoggerProvider"/> for given root <paramref name="log"/></para>
+        /// <para>Create a new <see cref="VostokLoggerProvider"/> for given root <paramref name="log"/>.</para>
         /// </summary>
-        /// <param name="log"><see cref="ILog"/> to write log events to</param>
-        public VostokLoggerProvider([NotNull] ILog log)
+        /// <param name="log"><see cref="ILog"/> to write log events to.</param>
+        public VostokLoggerProvider([NotNull] ILog log, [CanBeNull] VostokLoggerProviderSettings settings = null)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
+            this.settings = settings ?? new VostokLoggerProviderSettings();
         }
 
         /// <inheritdoc />
@@ -38,7 +40,7 @@ namespace Vostok.Logging.Microsoft
         [NotNull]
         public ILogger CreateLogger([CanBeNull] string categoryName)
         {
-            return new Logger(string.IsNullOrEmpty(categoryName) ? log : log.ForContext(categoryName));
+            return new Logger(string.IsNullOrEmpty(categoryName) ? log : log.ForContext(categoryName), settings.DisabledScopes);
         }
 
         /// <inheritdoc />
@@ -51,11 +53,13 @@ namespace Vostok.Logging.Microsoft
             private const string OriginalFormatKey = "{OriginalFormat}";
 
             private readonly ILog log;
+            private readonly HashSet<Type> disabledScopes;
             private readonly AsyncLocal<Scope> currentScope = new AsyncLocal<Scope>();
 
-            public Logger(ILog log)
+            public Logger(ILog log, HashSet<Type> disabledScopes)
             {
                 this.log = log;
+                this.disabledScopes = disabledScopes;
             }
 
             public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -76,6 +80,9 @@ namespace Vostok.Logging.Microsoft
 
             public IDisposable BeginScope<TState>(TState state)
             {
+                if (disabledScopes?.Contains(typeof(TState)) == false)
+                    return new EmptyDisposable();
+
                 var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);
                 var scopeLog = log.WithOperationContext();
 
@@ -90,7 +97,7 @@ namespace Vostok.Logging.Microsoft
                     }
                 }
                 
-                var scope = new Scope(scopeLog, scopeValue);
+                var scope = new Scope(scopeLog, scopeValue, currentScope);
                 currentScope.Value = scope;
                 return scope;
             }
@@ -154,19 +161,32 @@ namespace Vostok.Logging.Microsoft
 
             private class Scope : IDisposable
             {
-                private readonly OperationContextToken operationContextToken;
-
                 public readonly ILog Log;
+                
+                private readonly OperationContextToken operationContextToken;
+                private readonly AsyncLocal<Scope> scope;
+                private readonly Scope previousScopeValue;
 
-                public Scope(ILog log, string scopeValue)
+                public Scope(ILog log, string scopeValue, AsyncLocal<Scope> scope)
                 {
                     Log = log;
+                    this.scope = scope;
                     operationContextToken = new OperationContextToken(scopeValue);
+                    previousScopeValue = scope.Value;
+                    scope.Value = this;
                 }
 
                 public void Dispose()
                 {
                     operationContextToken.Dispose();
+                    scope.Value = previousScopeValue;
+                }
+            }
+
+            private class EmptyDisposable : IDisposable
+            {
+                public void Dispose()
+                {
                 }
             }
         }

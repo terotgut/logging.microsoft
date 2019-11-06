@@ -129,11 +129,61 @@ namespace Vostok.Logging.Microsoft.Tests
             }
 
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message {p1} {p2}")
-                .WithProperty("OperationContext", new OperationContextValue("scope sv1 sv2"))
+                .WithProperty("operationContext", new OperationContextValue("scope sv1 sv2"))
                 .WithProperty("sp1", "sv1")
                 .WithProperty("sp2", "sv2")
                 .WithProperty("p1", "v1")
                 .WithProperty("p2", "v2");
+
+            log.Events.Single()
+                .Should()
+                .BeEquivalentTo(
+                    expectedLogEvent,
+                    o => o.Excluding(x => x.Timestamp));
+        }
+
+        [Test]
+        public void Log_AfterScopeWithProperties_LogsWithoutScopeProperties()
+        {
+            var logger = loggerProvider.CreateLogger(null);
+            using (logger.BeginScope("scope {sp1} {sp2}", "sv1", "sv2"))
+            {
+                logger.LogInformation("message {p1} {p2}", "v1", "v2");
+            }
+
+            logger.LogInformation("message {p1} {p2}", "v1", "v2");
+
+            var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message {p1} {p2}")
+                .WithProperty("p1", "v1")
+                .WithProperty("p2", "v2");
+
+            log.Events.Last()
+                .Should()
+                .BeEquivalentTo(
+                    expectedLogEvent,
+                    o => o.Excluding(x => x.Timestamp));
+        }
+
+        [Test]
+        public void Log_InDisabledScope_LogsWithoutScope()
+        {
+            loggerProvider = new VostokLoggerProvider(log, new VostokLoggerProviderSettings
+            {
+                DisabledScopes = new HashSet<Type>
+                {
+                    typeof(HashSet<int>)
+                }
+            });
+
+            var logger = loggerProvider.CreateLogger(null);
+            using (logger.BeginScope(new HashSet<int>()))
+            using (logger.BeginScope(new HashSet<string>()))
+            {
+                logger.LogInformation("message");
+            }
+            
+            var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message")
+                .WithProperty("operationContext", new OperationContextValue(new[] { "System.Collections.Generic.HashSet`1[System.Int32]" }));
 
             log.Events.Single()
                 .Should()
@@ -153,7 +203,7 @@ namespace Vostok.Logging.Microsoft.Tests
             }
 
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message {p1} {p2}")
-                .WithProperty("OperationContext", new OperationContextValue(new[]{"s1", "s2"}))
+                .WithProperty("operationContext", new OperationContextValue(new[] {"s1", "s2"}))
                 .WithProperty("p1", "v1")
                 .WithProperty("p2", "v2");
 
@@ -187,7 +237,7 @@ namespace Vostok.Logging.Microsoft.Tests
                     expectedLogEvent,
                     o => o.Excluding(x => x.Timestamp));
         }
-        
+
         [Test]
         public void Log_WithEventIdWithIdOnly_LogsValidEvent()
         {
@@ -202,7 +252,7 @@ namespace Vostok.Logging.Microsoft.Tests
                     expectedLogEvent,
                     o => o.Excluding(x => x.Timestamp));
         }
-        
+
         [Test]
         public void Log_WithEventIdWithNAMEOnly_LogsValidEvent()
         {
@@ -217,7 +267,7 @@ namespace Vostok.Logging.Microsoft.Tests
                     expectedLogEvent,
                     o => o.Excluding(x => x.Timestamp));
         }
- 
+
         [Test]
         public void Log_InScopeInDifferentAsyncLocalContexts_LogsInValidScopes()
         {
@@ -225,7 +275,7 @@ namespace Vostok.Logging.Microsoft.Tests
 
             var start = new ManualResetEventSlim(false);
             var wait = new ManualResetEventSlim(false);
-                
+
             var task = Task.Run(
                 () =>
                 {
@@ -243,7 +293,7 @@ namespace Vostok.Logging.Microsoft.Tests
             task.Wait();
 
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message")
-                .WithProperty("OperationContext", new OperationContextValue("outer-scope"));
+                .WithProperty("operationContext", new OperationContextValue("outer-scope"));
 
             log.Events.Single()
                 .Should()
@@ -251,14 +301,14 @@ namespace Vostok.Logging.Microsoft.Tests
                     expectedLogEvent,
                     o => o.Excluding(x => x.Timestamp));
         }
-       
+
         private class MemoryLog : ILog
         {
             public readonly List<LogEvent> Events = new List<LogEvent>();
 
             public void Log(LogEvent @event)
             {
-                lock(Events)
+                lock (Events)
                     Events.Add(@event);
             }
 

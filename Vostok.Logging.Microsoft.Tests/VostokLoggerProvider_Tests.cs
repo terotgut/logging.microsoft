@@ -169,9 +169,9 @@ namespace Vostok.Logging.Microsoft.Tests
         {
             loggerProvider = new VostokLoggerProvider(log, new VostokLoggerProviderSettings
             {
-                DisabledScopes = new HashSet<Type>
+                DisabledScopes = new HashSet<string>
                 {
-                    typeof(HashSet<int>)
+                    typeof(HashSet<int>).FullName
                 }
             });
 

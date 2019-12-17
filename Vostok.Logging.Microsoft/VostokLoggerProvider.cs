@@ -54,10 +54,10 @@ namespace Vostok.Logging.Microsoft
             private const string OriginalFormatKey = "{OriginalFormat}";
 
             private readonly ILog log;
-            private readonly IReadOnlyCollection<Type> disabledScopes;
+            private readonly IReadOnlyCollection<string> disabledScopes;
             private readonly AsyncLocal<UseScope> scope = new AsyncLocal<UseScope>();
 
-            public Logger(ILog log, IReadOnlyCollection<Type> disabledScopes)
+            public Logger(ILog log, IReadOnlyCollection<string> disabledScopes)
             {
                 this.log = log;
                 this.disabledScopes = disabledScopes;
@@ -81,10 +81,13 @@ namespace Vostok.Logging.Microsoft
 
             public IDisposable BeginScope<TState>(TState state)
             {
-                if (disabledScopes?.Contains(typeof(TState)) == true)
+                var scopeName = typeof(TState).FullName;
+
+                if (disabledScopes?.Contains(scopeName) == true)
                     return new EmptyDisposable();
 
-                var scopeValue = ReferenceEquals(state, null) ? typeof(TState).FullName : Convert.ToString(state);
+                Console.WriteLine(typeof(TState).FullName);
+                var scopeValue = state == null ? scopeName : Convert.ToString(state);
                 var scopeLog = log.WithOperationContext();
 
                 if (state is IEnumerable<KeyValuePair<string, object>> props)

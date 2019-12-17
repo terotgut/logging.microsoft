@@ -12,6 +12,6 @@ namespace Vostok.Logging.Microsoft
         /// Collection of types that will be ignored in <see cref="ILogger.BeginScope{TState}"></see>./>
         /// </summary>
         [CanBeNull]
-        public IReadOnlyCollection<Type> DisabledScopes { get; set; }
+        public IReadOnlyCollection<string> DisabledScopes { get; set; }
     }
 }

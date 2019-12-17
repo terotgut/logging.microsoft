@@ -24,6 +24,16 @@ namespace Vostok.Logging.Microsoft
         /// <para>Create a new <see cref="VostokLoggerProvider"/> for given root <paramref name="log"/>.</para>
         /// </summary>
         /// <param name="log"><see cref="ILog"/> to write log events to.</param>
+        // ReSharper disable once RedundantOverload.Global
+        public VostokLoggerProvider([NotNull] ILog log)
+            : this(log, null)
+        {
+        }
+
+        /// <summary>
+        /// <para>Create a new <see cref="VostokLoggerProvider"/> for given root <paramref name="log"/>.</para>
+        /// </summary>
+        /// <param name="log"><see cref="ILog"/> to write log events to.</param>
         public VostokLoggerProvider([NotNull] ILog log, [CanBeNull] VostokLoggerProviderSettings settings = null)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));

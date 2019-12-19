@@ -167,13 +167,15 @@ namespace Vostok.Logging.Microsoft.Tests
         [Test]
         public void Log_InDisabledScope_LogsWithoutScope()
         {
-            loggerProvider = new VostokLoggerProvider(log, new VostokLoggerProviderSettings
-            {
-                DisabledScopes = new HashSet<string>
+            loggerProvider = new VostokLoggerProvider(
+                log,
+                new VostokLoggerProviderSettings
                 {
-                    typeof(HashSet<int>).FullName
-                }
-            });
+                    IgnoredScopes = new HashSet<string>
+                    {
+                        typeof(HashSet<int>).FullName
+                    }
+                });
 
             var logger = loggerProvider.CreateLogger(null);
             using (logger.BeginScope(new HashSet<int>()))
@@ -181,9 +183,9 @@ namespace Vostok.Logging.Microsoft.Tests
             {
                 logger.LogInformation("message");
             }
-            
+
             var expectedLogEvent = new LogEvent(LogLevel.Info, DateTimeOffset.UtcNow, "message")
-                .WithProperty("operationContext", new OperationContextValue(new[] { "System.Collections.Generic.HashSet`1[System.String]" }));
+                .WithProperty("operationContext", new OperationContextValue(new[] {"System.Collections.Generic.HashSet`1[System.String]"}));
 
             log.Events.Single()
                 .Should()

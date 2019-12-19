@@ -51,7 +51,7 @@ namespace Vostok.Logging.Microsoft
         [NotNull]
         public ILogger CreateLogger([CanBeNull] string categoryName)
         {
-            return new Logger(string.IsNullOrEmpty(categoryName) ? log : log.ForContext(categoryName), settings.DisabledScopes);
+            return new Logger(string.IsNullOrEmpty(categoryName) ? log : log.ForContext(categoryName), settings.IgnoredScopes);
         }
 
         /// <inheritdoc />
@@ -64,13 +64,13 @@ namespace Vostok.Logging.Microsoft
             private const string OriginalFormatKey = "{OriginalFormat}";
 
             private readonly ILog log;
-            private readonly IReadOnlyCollection<string> disabledScopes;
+            private readonly IReadOnlyCollection<string> ignoredScopes;
             private readonly AsyncLocal<UseScope> scope = new AsyncLocal<UseScope>();
 
-            public Logger(ILog log, IReadOnlyCollection<string> disabledScopes)
+            public Logger(ILog log, IReadOnlyCollection<string> ignoredScopes)
             {
                 this.log = log;
-                this.disabledScopes = disabledScopes;
+                this.ignoredScopes = ignoredScopes;
             }
 
             public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -93,7 +93,7 @@ namespace Vostok.Logging.Microsoft
             {
                 var scopeName = typeof(TState).FullName;
 
-                if (disabledScopes?.Contains(scopeName) == true)
+                if (ignoredScopes?.Contains(scopeName) == true)
                     return new EmptyDisposable();
 
                 var scopeValue = state == null ? scopeName : Convert.ToString(state);
@@ -109,7 +109,7 @@ namespace Vostok.Logging.Microsoft
                         }
                     }
                 }
-                
+
                 return new UseScope(scopeLog, scopeValue, scope);
             }
 
@@ -173,7 +173,7 @@ namespace Vostok.Logging.Microsoft
             private class UseScope : IDisposable
             {
                 public readonly ILog Log;
-                
+
                 private readonly OperationContextToken operationContextToken;
                 private readonly AsyncLocal<UseScope> scope;
                 private readonly UseScope previousScopeValue;

@@ -96,7 +96,6 @@ namespace Vostok.Logging.Microsoft
                 if (disabledScopes?.Contains(scopeName) == true)
                     return new EmptyDisposable();
 
-                Console.WriteLine(typeof(TState).FullName);
                 var scopeValue = state == null ? scopeName : Convert.ToString(state);
                 var scopeLog = log.WithOperationContext();
 

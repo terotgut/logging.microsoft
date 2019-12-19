@@ -1,3 +1,6 @@
+## 2.0.1 (19.12.19):
+Added `VostokLoggerProviderSettings` that allows to ignore some scopes.
+
 ## 2.0.0 (26.06.2019):
 
 * Breaking change: BeginScope() method no longer adds a `Scope` property to log events. Instead, it utilizes well-known operation context property.

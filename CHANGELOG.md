@@ -1,4 +1,4 @@
-## 2.0.1 (19.12.19):
+## 2.0.2 (19.12.19):
 Added `VostokLoggerProviderSettings` that allows to ignore some scopes.
 
 ## 2.0.0 (26.06.2019):

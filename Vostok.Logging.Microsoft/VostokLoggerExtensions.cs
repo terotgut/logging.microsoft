@@ -19,5 +19,15 @@ namespace Vostok.Logging.Microsoft
             factory.AddProvider(new VostokLoggerProvider(log));
             return factory;
         }
+
+        /// <summary>
+        /// <para>Add a new <see cref="VostokLoggerProvider"/> for given root <paramref name="log"/> to the <paramref name="builder"/></para>
+        /// </summary>
+        [NotNull]
+        public static ILoggingBuilder AddVostok([NotNull] this ILoggingBuilder builder, [NotNull] ILog log)
+        {
+            builder.AddProvider(new VostokLoggerProvider(log));
+            return builder;
+        }
     }
 }

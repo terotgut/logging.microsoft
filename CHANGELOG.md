@@ -1,4 +1,7 @@
-## 2.0.2 (19.12.19):
+## 2.0.3 (23.12.2019)
+Create `loggerFactory.AddVostok(log)` extension method
+
+## 2.0.2 (19.12.2019):
 Added `VostokLoggerProviderSettings` that allows to ignore some scopes.
 
 ## 2.0.0 (26.06.2019):

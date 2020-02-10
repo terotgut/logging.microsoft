@@ -12,6 +12,7 @@ notests *default:
     - vostok.devtools
     - vostok.logging.abstractions
     - vostok.logging.context
+    - vostok.commons.helpers/src
 
 full-build > notests:
   build:

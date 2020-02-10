@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Vostok.Commons.Helpers.Disposable;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Context;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -191,13 +192,6 @@ namespace Vostok.Logging.Microsoft
                 {
                     operationContextToken.Dispose();
                     scope.Value = previousScopeValue;
-                }
-            }
-
-            private class EmptyDisposable : IDisposable
-            {
-                public void Dispose()
-                {
                 }
             }
         }

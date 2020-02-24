@@ -39,6 +39,21 @@ namespace Vostok.Logging.Microsoft.Tests
             logger.IsEnabled(level).Should().Be(expectedEnabled);
         }
 
+        [TestCase(LogLevel.Warn, MsLogLevel.Error, true)]
+        [TestCase(LogLevel.Warn, MsLogLevel.Warning, true)]
+        [TestCase(LogLevel.Warn, MsLogLevel.Information, false)]
+        public void IsEnabledFor_ReturnsValidResult_with_minimum_level_setting(LogLevel minLevel, MsLogLevel level, bool expectedEnabled)
+        {
+            loggerProvider = new VostokLoggerProvider(log, new VostokLoggerProviderSettings
+            {
+                MinimumLevel = minLevel
+            });
+
+            var logger = loggerProvider.CreateLogger(null);
+
+            logger.IsEnabled(level).Should().Be(expectedEnabled);
+        }
+
         [TestCase(null)]
         [TestCase("context")]
         public void CreateLoggerForCategory_ReturnsLoggerForValidContext(string context)

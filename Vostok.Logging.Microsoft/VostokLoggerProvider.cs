@@ -38,6 +38,9 @@ namespace Vostok.Logging.Microsoft
         public VostokLoggerProvider([NotNull] ILog log, [CanBeNull] VostokLoggerProviderSettings settings)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
+            if (settings?.MinimumLevel != null)
+                this.log = this.log.WithMinimumLevel(settings.MinimumLevel.Value);
+
             this.settings = settings ?? new VostokLoggerProviderSettings();
         }
 

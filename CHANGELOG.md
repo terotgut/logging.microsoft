@@ -1,3 +1,6 @@
+## 2.0.4 (24.02.2020)
+Added `MinimumLevel` setting.
+
 ## 2.0.3 (23.12.2019)
 Create `loggerFactory.AddVostok(log)` extension method
 

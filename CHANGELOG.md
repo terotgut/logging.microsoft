@@ -1,3 +1,6 @@
+## 2.0.5 (26.02.2020)
+Removed `MinimumLevel` setting.
+
 ## 2.0.4 (24.02.2020)
 Added `MinimumLevel` setting.
 

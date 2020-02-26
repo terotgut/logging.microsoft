@@ -12,11 +12,5 @@ namespace Vostok.Logging.Microsoft
         /// </summary>
         [CanBeNull]
         public IReadOnlyCollection<string> IgnoredScopes { get; set; }
-
-        /// <summary>
-        /// If set to some value, limits the minimum level of log entries.
-        /// </summary>
-        [CanBeNull]
-        public Abstractions.LogLevel? MinimumLevel { get; set; }
     }
 }

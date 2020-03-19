@@ -1,3 +1,7 @@
+## 2.0.7 (19.03.2020)
+
+Added `MicrosoftLogScopes` constants.
+
 ## 2.0.6 (05.03.2020)
 
 Fixed multiple scopes logging.

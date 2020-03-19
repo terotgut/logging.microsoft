@@ -9,9 +9,9 @@ namespace Vostok.Logging.Microsoft.Helpers
         public const string ActionLogScopeOld = "Microsoft.AspNetCore.Mvc.Internal.MvcCoreLoggerExtensions+ActionLogScope";
 
         public const string HostingLogScope = "Microsoft.AspNetCore.Hosting.HostingLoggerExtensions+HostingLogScope";
+        public const string HostingLogScopeOld = "Microsoft.AspNetCore.Hosting.Internal.HostingLoggerExtensions+HostingLogScope";
 
         public const string ConnectionLogScope = "Microsoft.AspNetCore.Server.Kestrel.Core.Internal.ConnectionLogScope";
-        public const string HostingLogScopeOld = "Microsoft.AspNetCore.Hosting.Internal.HostingLoggerExtensions+HostingLogScope";
 
         public const string HealthCheckLogScope = "Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckLogScope";
 

@@ -1,3 +1,7 @@
+## 2.0.8 (19.03.2020)
+
+Added `MicrosoftLog` adapter.
+
 ## 2.0.7 (19.03.2020)
 
 Added `MicrosoftLogScopes` constants.
